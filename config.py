@@ -14,12 +14,12 @@ def get_database_uri():
     # app.config['SQLALCHEMY_DATABASE_URI'] = "mssql+pyodbc:///?odbc_connect=%s" % params
 
     params = {
-        'driver': '{ODBC Driver 17 for SQL Server}',
-        'server': '192.168.1.200',
-        'port': '1433',
-        'uid': 'sa',
-        'pwd': 'raduguiF1re@',
-        'database': 'sis',
+        'driver': environ.get('DB_ODBC_DRIVER', '{ODBC Driver 17 for SQL Server}'),
+        'server': environ.get('DB_SERVER', '192.168.1.200'),
+        'port': environ.get('DB_PORT', '1433'),
+        'uid': environ.get('DB_USERNAME', 'sa'),
+        'pwd': environ.get('DB_PASSWORD', 'raduguiF1re@'),
+        'database': environ.get('DB_NAME', 'sis'),
     }
 
     schema = 'mssql+pyodbc'
