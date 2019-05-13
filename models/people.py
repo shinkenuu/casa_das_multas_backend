@@ -1,59 +1,75 @@
 from sqlalchemy.dialects.mssql import BIT, DATETIME, DECIMAL, MONEY, NVARCHAR, NTEXT, UNIQUEIDENTIFIER
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from app import db
 
 
-class Pessoa(db.Model):
+class Person(db.Model):
     __tablename__ = 'Pessoas_Pessoa'
 
-    ID = db.Column(db.Integer, primary_key=True)  # [ID] [int] IDENTITY(1,1) NOT NULL,
-    Bairro = db.Column(NVARCHAR(60), nullable=True)  # [Bairro] [nvarchar](60) NULL,
-    FisicaJuridica = db.Column(NVARCHAR(8), nullable=True)  # FÍSICA | JURÍDICA - [FisicaJuridica] [nvarchar](8) NULL,
-    NomeRazaoSocial = db.Column(NVARCHAR(60), nullable=True)  # [NomeRazaoSocial] [nvarchar](60) NULL,
-    apelidoFantasia = db.Column(NVARCHAR(60), nullable=True)  # [ApelidoFantasia] [nvarchar](60) NULL,
-    CpfCnpj = db.Column(NVARCHAR(20), nullable=True)  # no symbols, just digits - [CpfCnpj] [nvarchar](20) NULL,
-    FlagCliente = db.Column(BIT(), nullable=False, default=True)  # [FlagCliente] [bit] NOT NULL,
-    FlagFornecedor = db.Column(BIT(), nullable=False, default=False)  # [FlagFornecedor] [bit] NOT NULL,
-    FlagColaborador = db.Column(BIT(), nullable=False, default=False)  # [FlagColaborador] [bit] NOT NULL,
-    FlagTransportador = db.Column(BIT(), nullable=False, default=False)  # [FlagTransportador] [bit] NOT NULL,
-    Logradouro = db.Column(NVARCHAR(60), nullable=True)  # [Logradouro] [nvarchar](60) NULL,
-    Cep = db.Column(NVARCHAR(20), nullable=True)  # no symbols, just digits [Cep] - [nvarchar](10) NULL,
-    Telefone1 = db.Column(NVARCHAR(20), nullable=True)  # no symbols, just digits - [Telefone1] [nvarchar](20) NULL,
-    Telefone2 = db.Column(NVARCHAR(20), nullable=True)  # no symbols, just digits - [Telefone2] [nvarchar](20) NULL,
-    Fax = db.Column(NVARCHAR(20), nullable=True)  # [Fax] [nvarchar](20) NULL,
-    Celular = db.Column(NVARCHAR(20), nullable=True)  # [Celular] [nvarchar](20) NULL,
-    Contato1 = db.Column(NVARCHAR(60), nullable=True)  # [Contato1] [nvarchar](60) NULL,
-    Contato2 = db.Column(NVARCHAR(60), nullable=True)  # [Contato2] [nvarchar](60) NULL,
-    Email = db.Column(NVARCHAR(80), nullable=True)  # [Email] [nvarchar](80) NULL,
-    PontoReferencia = db.Column(NVARCHAR(60), nullable=True)  # [PontoReferencia] [nvarchar](60) NULL,
-    DataNascimento = db.Column(DATETIME(), nullable=True)  # [DataNascimento] [datetime] NULL,
-    ValorAluguel = db.Column(MONEY(), nullable=True)  # [ValorAluguel] [money] NULL,
-    RendaAtual = db.Column(MONEY(), nullable=True)  # [RendaAtual] [money] NULL,
-    RendaConjuge = db.Column(MONEY(), nullable=True)  # [RendaConjuge] [money] NULL,
-    FlagEnviaCobranca = db.Column(BIT(), nullable=False, default=False)  # [FlagEnviaCobranca] [bit] NOT NULL,
-    LimiteCredito = db.Column(DECIMAL(10, 2), nullable=True)  # [LimiteCredito] [decimal](10, 2) NULL,
-    FlagOptanteSimplesEstadual = db.Column(BIT(), nullable=False,
-                                           default=False)  # [FlagOptanteSimplesEstadual] [bit] NOT NULL,
-    FlagProdutorRural = db.Column(BIT(), nullable=False, default=False)  # [FlagProdutorRural] [bit] NOT NULL,
-    Observacao = db.Column(NTEXT(), nullable=True)  # [Observacao] [ntext] NULL,
-    FlagDadosIncompletos = db.Column(BIT(), nullable=False, default=False)  # [FlagDadosIncompletos] [bit] NOT NULL,
-    FlagAtivo = db.Column(BIT(), nullable=False, default=True)  # [FlagAtivo] [bit] NOT NULL,
-    CriadoEm = db.Column(DATETIME(), nullable=True)  # [CriadoEm] [datetime] NULL, DEFAULT (getdate())
-    ModificadoEm = db.Column(DATETIME(), nullable=True)  # [ModificadoEm] [datetime] NULL, DEFAULT (getdate())
-    Numero = db.Column(NVARCHAR(10), nullable=True)  # [Numero] [nvarchar](10) NULL,
-    UID = db.Column(UNIQUEIDENTIFIER(), nullable=True)  # [UID] [uniqueidentifier] NULL, DEFAULT (newid())
-    EmailNFe = db.Column(NVARCHAR(80), nullable=True)  # [EmailNFe] [nvarchar](80) NULL,
+    id = db.Column('ID', db.Integer, primary_key=True)
+    legal_type = db.Column('FisicaJuridica', NVARCHAR(8), nullable=True)  # FÍSICA | JURÍDICA
+    name = db.Column('NomeRazaoSocial', NVARCHAR(60), nullable=True)
+    nickname = db.Column('apelidoFantasia', NVARCHAR(60), nullable=True)
+    rg_ie = db.Column('RgIe', NVARCHAR(20), nullable=True)
+    cpf_cnpj = db.Column('CpfCnpj', NVARCHAR(20), nullable=True)
+    is_customer = db.Column('FlagCliente', BIT(), nullable=False, default=True)
+    is_provider = db.Column('FlagFornecedor', BIT(), nullable=False, default=False)
+    is_collaborator = db.Column('FlagColaborador', BIT(), nullable=False, default=False)
+    is_transporter = db.Column('FlagTransportador', BIT(), nullable=False, default=False)
+    FlagProdutorRural = db.Column(BIT(), nullable=False, default=False)
+
+    public_name = db.Column('Logradouro', NVARCHAR(60), nullable=True)
+    address_number = db.Column('Numero', NVARCHAR(10), nullable=True)
+    neighborhood = db.Column('Bairro', NVARCHAR(60), nullable=True)
+    address_reference = db.Column('PontoReferencia', NVARCHAR(60), nullable=True)
+    zip_code = db.Column('Cep', NVARCHAR(20), nullable=True)
+
+    phone_1 = db.Column('Telefone1', NVARCHAR(20), nullable=True)
+    phone_2 = db.Column('Telefone2', NVARCHAR(20), nullable=True)
+    fax = db.Column('Fax', NVARCHAR(20), nullable=True)
+    cellphone = db.Column('Celular', NVARCHAR(20), nullable=True)
+    contact_1 = db.Column('Contato1', NVARCHAR(60), nullable=True)
+    contact_2 = db.Column('Contato2', NVARCHAR(60), nullable=True)
+    email = db.Column('Email', NVARCHAR(80), nullable=True)
+    email_nfe = db.Column('EmailNFe', NVARCHAR(80), nullable=True)
+
+    birth_date = db.Column('DataNascimento', DATETIME(), nullable=True)
+    ValorAluguel = db.Column(MONEY(), nullable=True)
+    RendaAtual = db.Column(MONEY(), nullable=True)
+    RendaConjuge = db.Column(MONEY(), nullable=True)
+    FlagEnviaCobranca = db.Column(BIT(), nullable=False, default=False)
+    LimiteCredito = db.Column(DECIMAL(10, 2), nullable=True)
+    FlagOptanteSimplesEstadual = db.Column(BIT(), nullable=False, default=False)
+    observation = db.Column('Observacao', NTEXT(), nullable=True)
+    is_incomplete_data = db.Column('FlagDadosIncompletos', BIT(), nullable=False, default=False)
+
+    uid = db.Column('UID', UNIQUEIDENTIFIER(), nullable=True)
+    is_active = db.Column('FlagAtivo', BIT(), nullable=False, default=True)
+    created_at = db.Column('CriadoEm', DATETIME(), nullable=True)  # DEFAULT (getdate())
+    updated_at = db.Column('ModificadoEm', DATETIME(), nullable=True)  # DEFAULT (getdate())
 
     #  FKs
-    CriadoPor = db.Column(db.Integer, db.ForeignKey('Security_Membership.ID'),
-                          nullable=False)  # [CriadoPor] [int] NOT NULL, [Security_Membership]
-    ModificadoPor = db.Column(db.Integer, db.ForeignKey('Security_Membership.ID'),
-                              nullable=False)  # [ModificadoPor] [int] NOT NULL, [Security_Membership]
+    CriadoPor = db.Column(db.Integer, db.ForeignKey('Security_Membership.ID'), nullable=False)  # Security_Membership
+    ModificadoPor = db.Column(db.Integer, db.ForeignKey('Security_Membership.ID'), nullable=False)  # Security_Memb
 
-    EmpresaID = db.Column(db.Integer, db.ForeignKey('Pessoas_Empresas.ID'), nullable=False,
-                          default=1)  # [EmpresaID] [int] NOT NULL,
-    CidadeID = db.Column(db.Integer, db.ForeignKey('Pessoas_Cidades.ID'), nullable=False)  # [CidadeID] [int] NOT NULL,
+    city_id = db.Column('CidadeID', db.Integer, db.ForeignKey('Pessoas_Cidades.ID'), nullable=False)
+    city = relationship('City')
 
-    RotaGrupoID = db.Column(db.Integer, nullable=True, default=1)  # [RotaGrupoID] [int] NULL,
-    ProfissaoAtividadeID = db.Column(db.Integer, nullable=True, default=1)  # [ProfissaoAtividadeID] [int] NULL,
-    ConceitoID = db.Column(db.Integer, nullable=True, default=1)  # [ConceitoID] [int] NULL,
+    EmpresaID = db.Column(db.Integer, nullable=False, default=1)
+
+    RotaGrupoID = db.Column(db.Integer, nullable=True, default=1)
+    ProfissaoAtividadeID = db.Column(db.Integer, nullable=True, default=1)
+    ConceitoID = db.Column(db.Integer, nullable=True, default=1)
+
+    @hybrid_property
+    def partner_types(self):
+        return [
+            partner_type
+            for partner_type in [
+                'CUSTOMER' if self.is_customer else None,
+                'PROVIDER' if self.is_provider else None,
+                'COLLABORATOR' if self.is_collaborator else None,
+            ] if partner_type is not None
+        ]
