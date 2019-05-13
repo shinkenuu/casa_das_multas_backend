@@ -9,10 +9,6 @@ BASE_DIR = path.abspath(path.dirname(__file__))
 
 
 def get_database_uri():
-    # params = quote_plus("DRIVER={SQL Server Native Client 10.0};SERVER=dagger;DATABASE=test;UID=user;PWD=password")
-    # params = quote_plus('DRIVER={SQL Server};SERVER=HARRISONS-THINK;DATABASE=LendApp;Trusted_Connection=yes;')
-    # app.config['SQLALCHEMY_DATABASE_URI'] = "mssql+pyodbc:///?odbc_connect=%s" % params
-
     params = {
         'driver': environ.get('DB_ODBC_DRIVER', '{ODBC Driver 17 for SQL Server}'),
         'server': environ.get('DB_SERVER', '192.168.1.200'),
