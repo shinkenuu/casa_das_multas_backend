@@ -1,8 +1,15 @@
 from sqlalchemy.dialects.mssql import BIT, DATETIME, DECIMAL, MONEY, NVARCHAR, NTEXT, UNIQUEIDENTIFIER
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from app import db
+from models.security import DEFAULT_APP_MEMBERSHIP_ID
+
+_LEGAL_TYPE_CHOICES = ('FÍSICA, JURÍDICA')
+
+_PARTNER_TYPE_CUSTOMER = 'CUSTOMER'
+_PARTNER_TYPE_PROVIDER = 'PROVIDER'
+_PARTNER_TYPE_COLLABORATOR = 'COLLABORATOR'
 
 
 class Person(db.Model):
@@ -51,8 +58,10 @@ class Person(db.Model):
     updated_at = db.Column('ModificadoEm', DATETIME(), nullable=True)  # DEFAULT (getdate())
 
     #  FKs
-    CriadoPor = db.Column(db.Integer, db.ForeignKey('Security_Membership.ID'), nullable=False)  # Security_Membership
-    ModificadoPor = db.Column(db.Integer, db.ForeignKey('Security_Membership.ID'), nullable=False)  # Security_Memb
+    created_by = db.Column('CriadoPor', db.Integer, db.ForeignKey('Security_Membership.ID'),
+                           nullable=False, default=DEFAULT_APP_MEMBERSHIP_ID)
+    updated_by = db.Column('ModificadoPor', db.Integer, db.ForeignKey('Security_Membership.ID'),
+                           nullable=False, default=DEFAULT_APP_MEMBERSHIP_ID)
 
     city_id = db.Column('CidadeID', db.Integer, db.ForeignKey('Pessoas_Cidades.ID'), nullable=False)
     city = relationship('City')
@@ -68,8 +77,18 @@ class Person(db.Model):
         return [
             partner_type
             for partner_type in [
-                'CUSTOMER' if self.is_customer else None,
-                'PROVIDER' if self.is_provider else None,
-                'COLLABORATOR' if self.is_collaborator else None,
+                _PARTNER_TYPE_CUSTOMER if self.is_customer else None,
+                _PARTNER_TYPE_PROVIDER if self.is_provider else None,
+                _PARTNER_TYPE_COLLABORATOR if self.is_collaborator else None,
             ] if partner_type is not None
         ]
+
+    def set_partner_types(self, partner_types: list):
+        self.is_customer = _PARTNER_TYPE_CUSTOMER in partner_types
+        self.is_provider = _PARTNER_TYPE_PROVIDER in partner_types
+        self.is_collaborator = _PARTNER_TYPE_COLLABORATOR in partner_types
+
+    @validates('legal_type')
+    def validate_legal_type(self, column_name, column_value):
+        assert column_value in _LEGAL_TYPE_CHOICES
+        return column_value

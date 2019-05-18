@@ -1,25 +1,42 @@
 from flask import request
-from flask_restful import abort, marshal_with, Resource
+from flask_restful import abort, Resource
 
+from app import db
 from models.people import Person
-from models.locations import City, State
-from schemas import CITY_SCHEMA, STATE_SCHEMA, PERSON_SCHEMA
+from models.locations import City
+from schemas.locations import CitySchema
+from schemas.people import PersonSchema
 
 
 class PeopleListResource(Resource):
+    schema = PersonSchema()
+
     def post(self):
-        return None, 204
+        schema_errors = self.schema.validate(request.json)
+
+        if schema_errors:
+            return schema_errors, 400
+
+        person = self.schema.load(request.json)
+
+        db.session.add(person)
+        db.session.commit()
+
+        serialized_person = self.schema.dump(person)
+        return serialized_person, 201
 
 
 class PeopleResource(Resource):
-    @marshal_with(PERSON_SCHEMA)
+    schema = PersonSchema()
+
     def get(self, people_id: int):
         person = Person.query.get(people_id)
 
         if not person:
             abort(404, message='person not found')
 
-        return person
+        serialized_person = self.schema.dump(person)
+        return serialized_person, 200
 
     def put(self, people_id: int):
         return None, 204
@@ -29,32 +46,20 @@ class PeopleResource(Resource):
 
 
 class CityResource(Resource):
-    @marshal_with(CITY_SCHEMA)
+    schema = CitySchema()
+
     def get(self):
-        ibge_code = request.args.get('ibge_code')
+        city_name = request.args.get('name')
 
-        if not ibge_code or not ibge_code.isdigit():
-            abort(400, message='invalid parameter "ibge_code"')
+        if not city_name:
+            abort(400, message='invalid parameter "name"')
+            return
 
-        city = City.query.filter_by(ibge_code=int(ibge_code)).first()
+        city = City.query.filter_by(name=city_name).first()
         
         if not city:
             abort(404, message='city not found')
-        
-        return city
+            return
 
-
-class StateResource(Resource):
-    @marshal_with(STATE_SCHEMA)
-    def get(self):
-        ibge_code = request.args.get('ibge_code')
-
-        if not ibge_code or not ibge_code.isdigit():
-            abort(400, message='invalid parameter "ibge_code"')
-
-        state = State.query.filter_by(ibge_code=int(ibge_code)).first()
-        
-        if not state:
-            abort(404, message='state not found')
-        
-        return state
+        serialized_city = self.schema.dump(city)
+        return serialized_city
