@@ -56,7 +56,7 @@ class CityResource(Resource):
             return
 
         city = City.query.filter_by(name=city_name).first()
-        
+
         if not city:
             abort(404, message='city not found')
             return

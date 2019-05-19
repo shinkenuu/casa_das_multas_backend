@@ -5,13 +5,13 @@ class StateSchema(Schema):
     id = fields.Int(required=True)
     name = fields.Str()
     federative_unity = fields.Str()
-    ibge_code = fields.Str(required=True)
+    ibge_code = fields.Str()
 
 
 class CitySchema(Schema):
     id = fields.Int(required=True)
     name = fields.Str()
-    ibge_code = fields.Str(required=True)
+    ibge_code = fields.Str()
     state_id = fields.Int()
 
 

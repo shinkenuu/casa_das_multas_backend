@@ -115,53 +115,10 @@ class PersonSchema(Schema):
             'email': contact.get('email'),
             'email_nfe': contact.get('email_nfe'),
 
-            'observation': item.get('observation'),
             'is_incomplete_data': item.get('is_incomplete_data'),
-            'uid': item.get('uid'),
         }
 
         person = Person(**person_kwargs)
         person.set_partner_types(item['partner_types'])
 
         return person
-
-_ = {
-   "id":1333,
-   "uid":"C42A0C00-5830-430F-95D0-AA29DE9BE979",
-   "code":"b5eb5c8d5bce87de87d5ce7db8ce7d",
-   "updated_at":"2011-12-16T10:54:32.707000+00:00",
-   "is_active":False,
-   "legal_type":"FÍSICA",
-   "partner_types":[
-      "CUSTOMER"
-   ],
-   "name":"JAIR PEREIRA BRANDÃO",
-   "nickname":None,
-   "cpf_cnpj":"25071902800",
-   "rg_ie":"24.835.355-X",
-   "contact":{
-      "name_1":None,
-      "name_2":None,
-      "phone_1":"1938917864",
-      "phone_2":"",
-      "fax":None,
-      "cellphone":"1997305545",
-      "email":None
-   },
-   "location":{
-      "public_name":"RUA ALCEU DO AMOROSO LIMA, 425",
-      "number":None,
-      "neighborhood":"JD. BANDEIRANTES",
-      "zip_code":"13840000",
-      "city":{
-         "id":7932,
-         "name":"Paim Filho"
-      },
-      "state":{
-         "id":23,
-         "name":"Rio Grande do Sul",
-         "federative_unity":"RS",
-         "ibge_code":"43"
-      }
-   }
-}
