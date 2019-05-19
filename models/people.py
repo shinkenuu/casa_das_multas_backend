@@ -1,4 +1,4 @@
-from sqlalchemy.dialects.mssql import BIT, DATETIME, DECIMAL, MONEY, NVARCHAR, NTEXT, UNIQUEIDENTIFIER
+from sqlalchemy.dialects.mssql import BIT, DATETIME, DECIMAL, MONEY, NVARCHAR #, UNIQUEIDENTIFIER, NTEXT
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -49,10 +49,10 @@ class Person(db.Model):
     FlagEnviaCobranca = db.Column(BIT(), nullable=False, default=False)
     LimiteCredito = db.Column(DECIMAL(10, 2), nullable=True)
     FlagOptanteSimplesEstadual = db.Column(BIT(), nullable=False, default=False)
-    observation = db.Column('Observacao', NTEXT(), nullable=True)
+    # observation = db.Column('Observacao', NTEXT(), nullable=True)
     is_incomplete_data = db.Column('FlagDadosIncompletos', BIT(), nullable=False, default=False)
 
-    uid = db.Column('UID', UNIQUEIDENTIFIER(), nullable=True)
+    # uid = db.Column('UID', UNIQUEIDENTIFIER(), nullable=True)
     is_active = db.Column('FlagAtivo', BIT(), nullable=False, default=True)
     created_at = db.Column('CriadoEm', DATETIME(), nullable=True)  # DEFAULT (getdate())
     updated_at = db.Column('ModificadoEm', DATETIME(), nullable=True)  # DEFAULT (getdate())
