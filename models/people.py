@@ -1,11 +1,11 @@
-from sqlalchemy.dialects.mssql import BIT, DATETIME, DECIMAL, MONEY, NVARCHAR #, UNIQUEIDENTIFIER, NTEXT
+from sqlalchemy.dialects.mssql import BIT, DATETIME, DECIMAL, MONEY, NVARCHAR
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from app import db
 from models.security import DEFAULT_APP_MEMBERSHIP_ID
 
-_LEGAL_TYPE_CHOICES = ('FÍSICA, JURÍDICA')
+_LEGAL_TYPE_CHOICES = 'FÍSICA, JURÍDICA'
 
 _PARTNER_TYPE_CUSTOMER = 'CUSTOMER'
 _PARTNER_TYPE_PROVIDER = 'PROVIDER'
@@ -16,7 +16,7 @@ class Person(db.Model):
     __tablename__ = 'Pessoas_Pessoa'
 
     id = db.Column('ID', db.Integer, primary_key=True)
-    legal_type = db.Column('FisicaJuridica', NVARCHAR(8), nullable=True)  # FÍSICA | JURÍDICA
+    legal_type = db.Column('FisicaJuridica', NVARCHAR(8), nullable=True)
     name = db.Column('NomeRazaoSocial', NVARCHAR(60), nullable=True)
     nickname = db.Column('apelidoFantasia', NVARCHAR(60), nullable=True)
     rg_ie = db.Column('RgIe', NVARCHAR(20), nullable=True)
@@ -49,10 +49,8 @@ class Person(db.Model):
     FlagEnviaCobranca = db.Column(BIT(), nullable=False, default=False)
     LimiteCredito = db.Column(DECIMAL(10, 2), nullable=True)
     FlagOptanteSimplesEstadual = db.Column(BIT(), nullable=False, default=False)
-    # observation = db.Column('Observacao', NTEXT(), nullable=True)
     is_incomplete_data = db.Column('FlagDadosIncompletos', BIT(), nullable=False, default=False)
 
-    # uid = db.Column('UID', UNIQUEIDENTIFIER(), nullable=True)
     is_active = db.Column('FlagAtivo', BIT(), nullable=False, default=True)
     created_at = db.Column('CriadoEm', DATETIME(), nullable=True)  # DEFAULT (getdate())
     updated_at = db.Column('ModificadoEm', DATETIME(), nullable=True)  # DEFAULT (getdate())
@@ -83,12 +81,19 @@ class Person(db.Model):
             ] if partner_type is not None
         ]
 
-    def set_partner_types(self, partner_types: list):
+    def update(self, data):
+        partner_types = data.get('partner_types', [])
+
         self.is_customer = _PARTNER_TYPE_CUSTOMER in partner_types
         self.is_provider = _PARTNER_TYPE_PROVIDER in partner_types
         self.is_collaborator = _PARTNER_TYPE_COLLABORATOR in partner_types
 
+        del data['partner_types']
+
+        for key, value in data.items():
+            self.__setattr__(key, value)
+
     @validates('legal_type')
-    def validate_legal_type(self, column_name, column_value):
+    def validate_legal_type(self, _, column_value):
         assert column_value in _LEGAL_TYPE_CHOICES
         return column_value

@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from marshmallow import INCLUDE, fields, post_load, pre_dump, Schema
 
 from models.locations import City
@@ -86,7 +84,6 @@ class PersonSchema(Schema):
 
     @post_load
     def _post_load(self, item):
-
         city_id = item['location']['city']['id']
         city = City.query.get(city_id)
 
@@ -99,6 +96,8 @@ class PersonSchema(Schema):
             'nickname': item.get('nickname'),
             'rg_ie': item.get('rg_ie'),
             'cpf_cnpj': item.get('cpf_cnpj'),
+
+            'partner_types': item.get('partner_types'),
 
             'public_name': location.get('public_name'),
             'address_number': location.get('number'),
@@ -118,7 +117,9 @@ class PersonSchema(Schema):
             'is_incomplete_data': item.get('is_incomplete_data'),
         }
 
-        person = Person(**person_kwargs)
-        person.set_partner_types(item['partner_types'])
+        id = item.get('id')
+
+        person = Person.query.get(id) if id else Person()
+        person.update(person_kwargs)
 
         return person

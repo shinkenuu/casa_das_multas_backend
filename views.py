@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import request
 from flask_restful import abort, Resource
 
@@ -39,9 +41,38 @@ class PeopleResource(Resource):
         return serialized_person, 200
 
     def put(self, people_id: int):
-        return None, 204
+        schema_errors = self.schema.validate(request.json)
+
+        if schema_errors:
+            return schema_errors, 400
+
+        payload = {
+            **request.json,
+            'id': people_id,
+        }
+
+        person = self.schema.load(payload)
+
+        if not person.id:
+            abort(404, message='person not found')
+
+        person.updated_at = datetime.now()
+
+        db.session.add(person)
+        db.session.commit()
+
+        serialized_person = self.schema.dump(person)
+        return serialized_person, 200
 
     def delete(self, people_id: int):
+        person = Person.query.get(people_id)
+
+        if not person:
+            abort(404, message='person not found')
+
+        db.session.delete(person)
+        db.session.commit()
+
         return None, 204
 
 
